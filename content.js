@@ -14,13 +14,15 @@ function isYouTube() {
 // ===== REMOVE SHORTS (GLOBAL) =====
 function removeShorts() {
 
-    // Remove Shorts shelf
-    document.querySelectorAll("ytd-reel-shelf-renderer").forEach(removeElement);
+    // ===== 1. Remove Shorts shelf (homepage)
+    document.querySelectorAll("ytd-reel-shelf-renderer")
+        .forEach(removeElement);
 
-    // Remove Shorts sidebar items
-    document.querySelectorAll("ytd-reel-item-renderer").forEach(removeElement);
+    // ===== 2. Remove Shorts sidebar (watch page)
+    document.querySelectorAll("ytd-reel-item-renderer")
+        .forEach(removeElement);
 
-    // Remove any Shorts links
+    // ===== 3. Remove ANY video that links to /shorts/
     document.querySelectorAll('a[href*="/shorts/"]').forEach(link => {
         const container = link.closest(
             "ytd-video-renderer, ytd-rich-item-renderer, ytd-compact-video-renderer"
@@ -28,10 +30,33 @@ function removeShorts() {
         if (container) removeElement(container);
     });
 
-    // Remove sections containing "Shorts"
+    // ===== 4. Sidebar (compact videos)
+    document.querySelectorAll("ytd-compact-video-renderer").forEach(el => {
+        const link = el.querySelector('a[href*="/shorts/"]');
+        if (link) removeElement(el);
+    });
+
+    // ===== 5. Search results (main fix 🔥)
+    document.querySelectorAll("ytd-video-renderer").forEach(video => {
+        const link = video.querySelector('a[href*="/shorts/"]');
+        if (link) removeElement(video);
+    });
+
+    // ===== 6. Section-based removal
     document.querySelectorAll("ytd-rich-section-renderer").forEach(section => {
         if (section.innerText.toLowerCase().includes("shorts")) {
             removeElement(section);
+        }
+    });
+
+    // ===== 7. Ultra fallback (text-based detection)
+    document.querySelectorAll("*").forEach(el => {
+        if (
+            el.children.length === 0 &&
+            el.innerText &&
+            el.innerText.trim().toLowerCase() === "shorts"
+        ) {
+            el.parentElement?.remove();
         }
     });
 }
